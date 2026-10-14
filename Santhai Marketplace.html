@@ -1,0 +1,584 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Santhai Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky ink header, aisle rail, split hero (pitch + deal board), filter sidebar + product grid, slide-in cart, stepper checkout. */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --ink:#101a30; --muted:#5b667c; --line:#dde2ea;
+  --head-bg:#14213d; --head-fg:#f4f6fb; --head-line:#2a3a60;
+  --accent:#f2a900; --on-accent:#1a1400; --deal:#c0392b; --ok:#1b7f55;
+  --tile-l:91%; --tile-ink:34%; --shadow:0 10px 30px rgba(16,26,48,.14);
+  --f-display:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1220; --surface:#151c2e; --ink:#eaeefb; --muted:#9aa5bf; --line:#27314c;
+  --head-bg:#090e1b; --head-fg:#eaeefb; --head-line:#1f2a45;
+  --accent:#f2b52e; --on-accent:#1a1400; --deal:#ef7a63; --ok:#4cc489;
+  --tile-l:24%; --tile-ink:76%; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1220; --surface:#151c2e; --ink:#eaeefb; --muted:#9aa5bf; --line:#27314c;
+  --head-bg:#090e1b; --head-fg:#eaeefb; --head-line:#1f2a45;
+  --accent:#f2b52e; --on-accent:#1a1400; --deal:#ef7a63; --ok:#4cc489;
+  --tile-l:24%; --tile-ink:76%; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);padding-inline:0}
+h1,h2,h3{font-family:var(--f-display);line-height:1.08;margin:0;text-wrap:balance;letter-spacing:-.02em}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{width:min(1280px,100%);margin-inline:auto;padding-inline:16px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* header */
+.strip{background:var(--head-bg);color:var(--head-fg);border-bottom:1px solid var(--head-line);font-size:13px}
+.strip .wrap{display:flex;gap:12px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-block:7px}
+.seg{display:inline-flex;border:1px solid var(--head-line);border-radius:999px;padding:2px}
+.seg button{background:none;border:0;border-radius:999px;padding:4px 12px;color:var(--head-fg);opacity:.75}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);opacity:1;font-weight:600}
+.strip .right{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pin{display:flex;gap:6px;align-items:center}
+.pin input{width:86px;background:transparent;border:1px solid var(--head-line);border-radius:6px;padding:3px 8px;color:var(--head-fg)}
+.link-btn{background:none;border:0;color:inherit;text-decoration:underline;padding:0}
+header.main{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--head-bg);color:var(--head-fg);border-bottom:1px solid var(--head-line)}
+header.main .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:12px 20px;align-items:center;padding-block:12px}
+.logo{font:800 26px var(--f-display);letter-spacing:-.03em;text-decoration:none;display:flex;align-items:baseline;gap:6px}
+.logo i{font-style:normal;width:10px;height:10px;background:var(--accent);border-radius:50%;display:inline-block}
+.search{display:flex;min-width:0;border-radius:10px;overflow:hidden;background:var(--surface);color:var(--ink);border:2px solid transparent}
+.search:focus-within{border-color:var(--accent)}
+.search select{border:0;background:var(--bg);padding:0 10px;max-width:130px;border-right:1px solid var(--line)}
+.search input{flex:1;min-width:0;border:0;background:transparent;padding:11px 12px;outline:none}
+.search button{border:0;background:var(--accent);color:var(--on-accent);padding:0 18px;font-weight:700}
+.icons{display:flex;gap:8px}
+.ibtn{position:relative;background:none;border:1px solid var(--head-line);color:var(--head-fg);border-radius:10px;padding:8px 12px;display:flex;gap:8px;align-items:center}
+.ibtn b{background:var(--accent);color:var(--on-accent);border-radius:999px;font-size:12px;min-width:20px;height:20px;display:grid;place-items:center;padding:0 5px}
+.rail{background:var(--surface);border-bottom:1px solid var(--line)}
+.rail .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 13px;white-space:nowrap}
+.chip svg{width:16px;height:16px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+svg.ic{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* hero */
+.hero .wrap{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;padding-block:36px}
+.hero h1{font-size:clamp(38px,6vw,72px);font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62% 92%,transparent 92%)}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:52ch;margin:18px 0 22px}
+.btn{border:0;border-radius:10px;padding:11px 18px;font-weight:700;background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.ink{background:var(--ink);color:var(--bg)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.audience{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.audience span{font-size:13px;border:1px dashed var(--line);border-radius:6px;padding:3px 9px;color:var(--muted)}
+.board{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.board header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.board h2{font-size:22px}
+.timer{color:var(--deal);font-weight:500}
+.deal{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--bg);text-align:left;width:100%}
+.deal:hover{border-color:var(--ink)}
+.deal .t{width:76px;aspect-ratio:1;border-radius:8px}
+.deal b{display:block;font-weight:600;line-height:1.25}
+.deal small{color:var(--muted)}
+.off{background:var(--deal);color:#fff;border-radius:6px;padding:2px 7px;font-weight:700;font-size:13px}
+
+/* tiles */
+.tile{--h:210;background:hsl(var(--h) 38% var(--tile-l));color:hsl(var(--h) 45% var(--tile-ink));display:grid;place-items:center;position:relative;overflow:hidden}
+.tile svg{width:42%;height:auto;max-height:70%;stroke-width:1.3}
+.tile::after{content:"";position:absolute;inset:auto -20% -45% auto;width:70%;aspect-ratio:1;border-radius:50%;background:hsl(var(--h) 45% var(--tile-ink) / .12)}
+.tile .brand{position:absolute;left:10px;bottom:8px;font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+
+/* who it serves */
+.serve .wrap{padding-block:8px 36px}
+.serve ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.serve li{border-top:3px solid var(--ink);padding:12px 2px 0}
+.serve li:nth-child(2){border-color:var(--accent)}
+.serve li:nth-child(3){border-color:var(--ok)}
+.serve li:nth-child(4){border-color:var(--deal)}
+.serve h3{font-size:19px;margin-bottom:4px}
+.serve p{margin:0;color:var(--muted);font-size:14px}
+
+/* catalog */
+.catalog .wrap{display:grid;grid-template-columns:250px 1fr;gap:24px;padding-block:20px 48px;align-items:start}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;position:sticky;top:calc(84px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:18px}
+.filters h3{font-size:14px;font-family:var(--f-mono);font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.filters label{display:flex;gap:8px;align-items:center;padding:3px 0}
+.filters input[type=range]{width:100%;accent-color:var(--accent)}
+.filters input[type=checkbox],.filters input[type=radio]{accent-color:var(--ink);width:16px;height:16px}
+.filters .cat-list{max-height:260px;overflow:auto}
+.toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar h2{font-size:26px}
+.toolbar select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.fbtn{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card .t{aspect-ratio:4/3;width:100%;border:0;padding:0;cursor:pointer}
+.card .body{padding:12px;display:flex;flex-direction:column;gap:5px;flex:1}
+.card h3{font-size:16px;font-family:var(--f-body);font-weight:600;letter-spacing:0;line-height:1.3;cursor:pointer}
+.stars{font-size:13px;color:var(--muted)}
+.stars b{color:var(--ink);background:var(--bg);border-radius:4px;padding:1px 6px;margin-right:6px}
+.price{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.price strong{font:500 19px var(--f-mono)}
+.price s{color:var(--muted);font-size:13px}
+.price span{color:var(--deal);font-weight:700;font-size:13px}
+.meta{font-size:12.5px;color:var(--muted)}
+.meta .fast{color:var(--ok);font-weight:600}
+.card .row{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.card .row .btn{flex:1;padding:9px 10px}
+.heart{background:none;border:1px solid var(--line);border-radius:10px;width:42px;font-size:18px;line-height:1}
+.heart[aria-pressed="true"]{color:var(--deal);border-color:var(--deal)}
+.card .corner{position:absolute;top:8px;left:8px}
+.empty{padding:48px 16px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+.more{display:flex;justify-content:center;margin-top:20px}
+
+/* sell strip + footer */
+.sell .wrap{padding-block:0 40px}
+.sell .box{background:var(--head-bg);color:var(--head-fg);border-radius:18px;padding:28px;display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:center}
+.sell h2{font-size:clamp(26px,3.4vw,38px)}
+.sell p{color:#b9c3dc;margin:10px 0 0}
+.sell ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-family:var(--f-mono);font-size:13px}
+.sell li::before{content:"→ ";color:var(--accent)}
+footer{background:var(--head-bg);color:#b9c3dc;font-size:14px}
+footer .wrap{padding-block:28px;display:grid;grid-template-columns:2fr repeat(3,1fr);gap:20px}
+footer h3{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--head-fg);margin-bottom:8px}
+footer p{margin:0 0 4px}
+footer .fine{grid-column:1/-1;border-top:1px solid var(--head-line);padding-top:14px;font-size:12.5px}
+
+/* overlays */
+.scrim{position:fixed;inset:0;background:rgba(5,9,20,.55);z-index:50;display:flex;justify-content:flex-end}
+.scrim.center{justify-content:center;align-items:center;padding:16px}
+.panel{background:var(--surface);color:var(--ink);height:100%;width:min(440px,100%);display:flex;flex-direction:column;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+.panel.modal{height:auto;max-height:100%;width:min(860px,100%);border-radius:18px;overflow:auto}
+.panel>header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.panel>header h2{font-size:22px}
+.x{background:none;border:1px solid var(--line);border-radius:8px;width:34px;height:34px}
+.lines{flex:1;overflow:auto;padding:6px 18px}
+.line{display:grid;grid-template-columns:64px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start}
+.line .t{width:64px;aspect-ratio:1;border-radius:8px}
+.line b{font-weight:600;line-height:1.25;display:block}
+.qty{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;align-items:center}
+.qty button{background:none;border:0;width:30px;height:30px;font-size:16px}
+.qty span{min-width:28px;text-align:center;font-family:var(--f-mono)}
+.sum{padding:14px 18px;border-top:1px solid var(--line);display:grid;gap:6px}
+.sum .r{display:flex;justify-content:space-between}
+.sum .tot{font:700 20px var(--f-display);padding-top:6px;border-top:1px dashed var(--line)}
+.coupon{display:flex;gap:6px}
+.coupon input,.fld input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:20px}
+.pd .t{border-radius:14px;aspect-ratio:1}
+.pd h2{font-size:28px}
+.pd .stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+.tiers{width:100%;border-collapse:collapse;font-size:13.5px}
+.tiers td,.tiers th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.tiers .on{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.similar{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.similar button{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px;text-align:left;display:grid;gap:6px;min-width:0}
+.similar .t{aspect-ratio:4/3;border-radius:6px;width:100%}
+.similar span{font-size:12.5px;line-height:1.25}
+.steps{display:flex;gap:6px;padding:14px 20px 0;font:500 12px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.steps span{flex:1;border-top:3px solid var(--line);padding-top:6px}
+.steps .on{border-color:var(--accent);color:var(--ink)}
+.form{padding:18px 20px 22px;display:grid;gap:12px}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:grid;gap:4px;min-width:0}
+.fld small{color:var(--deal);min-height:1em}
+.pay{display:grid;gap:8px}
+.pay label{display:flex;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px;align-items:center;cursor:pointer}
+.pay input{accent-color:var(--ink)}
+.pay label:has(input:checked){border-color:var(--ink);background:var(--bg)}
+.note{font-size:12.5px;color:var(--muted);background:var(--bg);border-radius:8px;padding:8px 10px}
+.done{padding:34px 24px;text-align:center;display:grid;gap:10px;justify-items:center}
+.done .ok{width:56px;height:56px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:28px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:80;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+@media (max-width:980px){
+  .hero .wrap{grid-template-columns:1fr}
+  .serve ul{grid-template-columns:1fr 1fr}
+  .catalog .wrap{grid-template-columns:1fr}
+  .filters{position:static;display:none}
+  .filters.open{display:flex}
+  .fbtn{display:inline-block}
+  .sell .box,.pd{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  header.main .wrap{grid-template-columns:1fr auto}
+  .search{grid-column:1/-1;order:3}
+  .search select{display:none}
+  .ibtn span.lbl{display:none}
+  .serve ul{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .card .body{padding:10px}
+  .card .row .btn{padding:8px 6px;font-size:14px}
+  .similar{grid-template-columns:1fr 1fr}
+  .form .two{grid-template-columns:1fr}
+  .deal{grid-template-columns:64px 1fr}
+  .deal .t{width:64px}
+  .deal .off{grid-column:2;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="strip"><div class="wrap">
+  <div class="seg" role="group" aria-label="Shopping mode">
+    <button id="mRetail" aria-pressed="true">Shop for home</button>
+    <button id="mBiz" aria-pressed="false">Business buying</button>
+  </div>
+  <div class="right">
+    <label class="pin">Deliver to <input id="pin" inputmode="numeric" maxlength="6" placeholder="641001" aria-label="Delivery pincode"></label>
+    <button class="link-btn" id="theme">Switch theme</button>
+  </div>
+</div></div>
+
+<header class="main"><div class="wrap">
+  <a class="logo" href="#top" aria-label="Santhai home">Santhai<i></i></a>
+  <form class="search" id="searchForm" role="search">
+    <select id="searchCat" aria-label="Search in aisle"></select>
+    <input id="q" type="search" placeholder="Search 72 products across 12 aisles" aria-label="Search products" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+  <div class="icons">
+    <button class="ibtn" id="wishBtn" aria-label="Wishlist">♥ <span class="lbl">Saved</span> <b id="wishN">0</b></button>
+    <button class="ibtn" id="cartBtn" aria-label="Open cart">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24"><path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+      <span class="lbl">Cart</span> <b id="cartN">0</b></button>
+  </div>
+</div></header>
+
+<nav class="rail" aria-label="Aisles"><div class="wrap" id="rail"></div></nav>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <div>
+    <h1>One market.<br>Twelve <em>aisles</em>.</h1>
+    <p class="lead">Phones to pulses, school books to shop-floor drills. Households, small businesses and institutions buy from the same shelves, with bulk prices and GST invoices switched on for business buyers.</p>
+    <div class="cta">
+      <button class="btn" id="shopNow">Browse all products</button>
+      <button class="btn ghost" id="goBiz">Switch to business buying</button>
+    </div>
+    <div class="audience"><span>Free delivery over ₹499</span><span>Bulk tiers at 5 and 20 units</span><span>Cash on delivery</span><span>7-day returns</span></div>
+  </div>
+  <aside class="board" aria-label="Today's deals">
+    <header><h2>Deal board</h2><span class="timer mono" id="timer">Ends in --:--:--</span></header>
+    <div id="deals" style="display:grid;gap:10px"></div>
+  </aside>
+</div></section>
+
+<section class="serve"><div class="wrap">
+  <ul>
+    <li><h3>Households</h3><p>Groceries, kitchen, fashion and books with UPI, card and cash on delivery.</p></li>
+    <li><h3>Small businesses</h3><p>Bulk tiers, GST invoice, and shop supplies such as scales, label printers and tape.</p></li>
+    <li><h3>Schools and clinics</h3><p>Repeat orders in volume: stationery, first-aid kits, monitors, shelving.</p></li>
+    <li><h3>Sellers and artisans</h3><p>Handloom, brass and terracotta makers list next to national brands.</p></li>
+  </ul>
+</div></section>
+
+<section class="catalog" id="catalog"><div class="wrap">
+  <aside class="filters" id="filters" aria-label="Filters">
+    <div><h3>Aisle</h3><div class="cat-list" id="catList"></div></div>
+    <div><h3>Max price <span class="mono" id="priceOut"></span></h3><input type="range" id="price" min="300" max="14000" step="100" value="14000" aria-label="Maximum price"></div>
+    <div><h3>Rating</h3>
+      <label><input type="radio" name="rate" value="0" checked> Any</label>
+      <label><input type="radio" name="rate" value="4"> 4★ and above</label>
+      <label><input type="radio" name="rate" value="4.5"> 4.5★ and above</label></div>
+    <div><h3>Offers</h3>
+      <label><input type="checkbox" id="fast"> Tomorrow delivery</label>
+      <label><input type="checkbox" id="deals25"> 25% off or more</label></div>
+    <button class="btn ghost" id="reset">Clear filters</button>
+  </aside>
+  <div style="min-width:0">
+    <div class="toolbar">
+      <h2 id="resTitle">All products</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn ghost fbtn" id="fbtn">Filters</button>
+        <span class="meta" id="resCount"></span>
+        <label class="sr" for="sort">Sort</label>
+        <select id="sort"><option value="rel">Featured</option><option value="pa">Price: low to high</option><option value="pd">Price: high to low</option><option value="rt">Top rated</option><option value="ds">Biggest discount</option><option value="rv">Most reviewed</option></select>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="more"><button class="btn ghost" id="more">Show more</button></div>
+  </div>
+</div></section>
+
+<section class="sell"><div class="wrap"><div class="box">
+  <div><h2>Make something? Sell it here.</h2><p>List by aisle, set bulk tiers for business buyers, and ship from your own pincode. This is a demo storefront, so the seller form is not connected.</p></div>
+  <ul><li>Weavers, potters, metalworkers</li><li>Wholesalers with GST registration</li><li>Brands with a catalogue of 10+ items</li></ul>
+</div></div></section>
+</main>
+
+<footer><div class="wrap">
+  <div><div class="logo" style="color:var(--head-fg);margin-bottom:8px">Santhai<i></i></div><p>A multi-aisle marketplace template for households, businesses and institutions.</p></div>
+  <div><h3>Shop</h3><p>All aisles</p><p>Deal board</p><p>Business buying</p></div>
+  <div><h3>Support</h3><p>Track order</p><p>Returns in 7 days</p><p>Bulk quotes</p></div>
+  <div><h3>Company</h3><p>Sell on Santhai</p><p>Careers</p><p>Contact</p></div>
+  <p class="fine">Demo storefront. Products, brands, prices and reviews are invented, and no order is placed, charged or shipped.</p>
+</div></footer>
+
+<div id="overlay"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ---------- catalogue data ---------- */
+const ICONS={
+ electronics:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+ fashion:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+ home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+ grocery:'<path d="M4 9h16l-2 11H6z"/><path d="m8 9 3-6M16 9l-3-6"/>',
+ beauty:'<path d="M9 3h6v5H9z"/><path d="M7 8h10v13H7z"/>',
+ books:'<path d="M3 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H3z"/><path d="M21 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7z"/>',
+ sports:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+ toys:'<rect x="3" y="12" width="8" height="8"/><rect x="13" y="12" width="8" height="8"/><rect x="8" y="4" width="8" height="8"/>',
+ auto:'<path d="m3 15 2-6h14l2 6v4h-3v-2H6v2H3z"/><circle cx="7.5" cy="14.5" r=".8"/><circle cx="16.5" cy="14.5" r=".8"/>',
+ health:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+ industrial:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+ crafts:'<path d="M4 4h16v16H4z"/><path d="M4 9h16M4 14h16M9 4v16M14 4v16"/>'
+};
+const CATS=[
+ {id:'electronics',name:'Electronics',h:215,items:[['Aero 5G Smartphone 8/128 GB','Novatek',13999],['Noise-cancelling Earbuds','Soundly',2499],['27" IPS Monitor 75 Hz','Viewra',11499],['20000 mAh Power Bank','Voltix',1799],['Mechanical Keyboard TKL','Keyforge',3299],['AMOLED Smartwatch','Tempo',4999]]},
+ {id:'fashion',name:'Fashion',h:340,items:[['Cotton Kurta Set','Aruvi',1299],['Slim-fit Chinos','Northline',1599],['Running Shoes','Strideon',2799],['Denim Jacket','Northline',2299],['Cotton Saree, Temple Border','Kovai Looms',2499],['Canvas Backpack 25 L','Carrywell',1199]]},
+ {id:'home',name:'Home & Kitchen',h:28,items:[['Induction Pressure Cooker 5 L','Hearthly',1899],['Non-stick Tawa Set','Hearthly',999],['Mixer Grinder 750 W','Whirlo',3299],['Memory-foam Mattress, Queen','Restwell',12999],['Steel Water Bottle 1 L','Keepcool',649],['LED Bulb Pack of 10','Lumia',799]]},
+ {id:'grocery',name:'Groceries',h:100,items:[['Sona Masoori Rice 25 kg','Delta Fields',1599],['Cold-pressed Groundnut Oil 5 L','Ghani Co',1349],['Filter Coffee Powder 1 kg','Kaapi Works',699],['Toor Dal 5 kg','Delta Fields',749],['Masala Combo, 8 packs','Spice Lane',899],['Almonds 1 kg','NutHouse',899]]},
+ {id:'beauty',name:'Beauty & Care',h:300,items:[['Vitamin C Serum 30 ml','Dermalab',599],['Sunscreen SPF 50','Dermalab',449],['Herbal Shampoo 500 ml','Vanam',399],['Beard Trimmer Pro','Trimz',1499],['Hair Dryer 1800 W','Glowa',1299],['Coconut Hair Oil 1 L','Vanam',349]]},
+ {id:'books',name:'Books & Stationery',h:262,items:[['Data Structures in C','Campus Press',549],['Introduction to Machine Learning','Campus Press',799],['Tamil Classics Box Set','Thiru Pathippagam',1299],['Sketchbook A4 200 gsm','Inkwell',299],['Competitive Exams Guide','Campus Press',449],['Fountain Pen Set','Inkwell',699]]},
+ {id:'sports',name:'Sports & Fitness',h:150,items:[['English Willow Cricket Bat','Willowcraft',5499],['Yoga Mat 6 mm','Zenfit',799],['Adjustable Dumbbells 20 kg','Ironside',3999],['Badminton Racket Pair','Smashr',1899],['21-speed Cycle','Trailo',10499],['Football, Size 5','Strideon',699]]},
+ {id:'toys',name:'Toys & Kids',h:48,items:[['Building Blocks, 500 pcs','Brickly',999],['Remote Control Car','Zoomie',1499],['Wooden Puzzle Set','Kolu Toys',599],['Chess and Ludo Board','Playhaus',449],['STEM Robotics Kit','Tinkerly',2999],['Art and Craft Box','Inkwell',549]]},
+ {id:'auto',name:'Auto & Bike',h:4,items:[['ISI Full-face Helmet','Ridesafe',1799],['Car Vacuum Cleaner','Voltix',1299],['Dashcam 1080p','Viewra',3499],['Chain Lube 250 ml','Gearup',249],['Portable Tyre Inflator','Gearup',1899],['Car Seat Cover Set','Cabin',3299]]},
+ {id:'health',name:'Health',h:175,items:[['Digital BP Monitor','Pulsea',1799],['Pulse Oximeter','Pulsea',899],['Whey Protein 1 kg','Ironside',2299],['First-aid Kit, 100 pcs','Careful',699],['Infrared Thermometer','Pulsea',1199],['Ayurvedic Immunity Tablets','Vanam',349]]},
+ {id:'industrial',name:'Business Supplies',h:235,items:[['Cordless Drill 18 V','Torqo',4299],['Safety Gloves, pack of 12','Ridesafe',899],['Thermal Label Printer','Printix',8499],['Packaging Tape 48 mm, 36 rolls','Packwise',1799],['5-tier Industrial Shelving','Stackr',5999],['Weighing Scale 100 kg','Weighwell',3499]]},
+ {id:'crafts',name:'Handloom & Crafts',h:14,items:[['Pochampally Cotton Stole','Kovai Looms',899],['Brass Lamp Pair','Thanjai Metals',1499],['Terracotta Planter Set','Kiln & Co',799],['Kalamkari Cushion Covers, 5','Kovai Looms',999],['Sandalwood Soap Box','Vanam',599],['Bamboo Basket Set','Kiln & Co',699]]}
+];
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const P=[];
+CATS.forEach((c,ci)=>c.items.forEach((it,ii)=>{
+  const id=ci*6+ii, r=rng(id*7919+13);
+  const disc=Math.round(8+r()*37), price=it[2];
+  P.push({id,cat:c.id,name:it[0],brand:it[1],price,mrp:Math.round(price/(1-disc/100)/10)*10,disc,
+    rating:Math.round((3.8+r()*1)*10)/10,reviews:Math.round(40+Math.pow(r(),2)*9000),fast:r()>.45,stock:r()>.88?Math.ceil(r()*4):99,rank:r()});
+}));
+const catOf=id=>CATS.find(c=>c.id===id);
+const byId=id=>P[id];
+
+/* ---------- state ---------- */
+const S={biz:false,cat:'all',q:'',max:14000,minRate:0,fast:false,d25:false,sort:'rel',shown:24,wishOnly:false,cart:{},wish:[]};
+try{const s=JSON.parse(localStorage.getItem('santhai')||'{}');if(s.cart)S.cart=s.cart;if(s.wish)S.wish=s.wish;if(s.biz)S.biz=s.biz;}catch(e){}
+function save(){try{localStorage.setItem('santhai',JSON.stringify({cart:S.cart,wish:S.wish,biz:S.biz}))}catch(e){}}
+const $=s=>document.querySelector(s);
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const icon=(k,cls='')=>`<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg>`;
+const tile=(p,cls='')=>`<div class="tile ${cls}" style="--h:${catOf(p.cat).h}">${icon(p.cat)}<span class="brand">${esc(p.brand)}</span></div>`;
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+
+/* bulk tiers apply to business buyers only */
+const tierRate=q=>!S.biz?1:q>=20?.85:q>=5?.92:1;
+const unit=(p,q)=>Math.round(p.price*tierRate(q));
+function eta(p){const d=new Date();d.setDate(d.getDate()+(p.fast?1:3));const f=x=>x.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  if(p.fast)return 'Tomorrow, '+f(d);const e=new Date(d);e.setDate(e.getDate()+2);return f(d)+' to '+f(e)}
+
+/* ---------- filtering ---------- */
+function list(){
+  let a=P.filter(p=>(S.cat==='all'||p.cat===S.cat)&&p.price<=S.max&&p.rating>=S.minRate&&(!S.fast||p.fast)&&(!S.d25||p.disc>=25)&&(!S.wishOnly||S.wish.includes(p.id)));
+  const q=S.q.trim().toLowerCase();
+  if(q)a=a.filter(p=>(p.name+' '+p.brand+' '+catOf(p.cat).name).toLowerCase().includes(q));
+  const f={pa:(x,y)=>x.price-y.price,pd:(x,y)=>y.price-x.price,rt:(x,y)=>y.rating-x.rating,ds:(x,y)=>y.disc-x.disc,rv:(x,y)=>y.reviews-x.reviews,rel:(x,y)=>y.rank-x.rank}[S.sort];
+  return a.sort(f);
+}
+function card(p){
+  const low=p.stock<10?`<span class="meta" style="color:var(--deal)">Only ${p.stock} left</span>`:'';
+  const biz=S.biz?`<div class="meta mono">${inr(unit(p,20))} each at 20+</div>`:'';
+  return `<article class="card"><button class="t" data-open="${p.id}" aria-label="View ${esc(p.name)}">${tile(p)}</button>
+  <div class="body"><h3 data-open="${p.id}">${esc(p.name)}</h3>
+  <div class="stars"><b>${p.rating} ★</b>${p.reviews.toLocaleString('en-IN')} reviews</div>
+  <div class="price"><strong>${inr(p.price)}</strong><s>${inr(p.mrp)}</s><span>${p.disc}% off</span></div>${biz}
+  <div class="meta">${p.fast?'<span class="fast">Tomorrow</span> delivery':'Delivery in 3 to 5 days'}</div>${low}
+  <div class="row"><button class="btn" data-add="${p.id}">Add to cart</button><button class="heart" data-wish="${p.id}" aria-pressed="${S.wish.includes(p.id)}" aria-label="Save ${esc(p.name)}">♥</button></div></div></article>`;
+}
+function renderGrid(){
+  const a=list(), shown=a.slice(0,S.shown);
+  $('#grid').innerHTML=shown.length?shown.map(card).join(''):'';
+  if(!shown.length)$('#grid').innerHTML='<div class="empty" style="grid-column:1/-1">No products match these filters. Clear a filter or search for something else.</div>';
+  $('#more').hidden=a.length<=S.shown;
+  $('#resCount').textContent=a.length+' of '+P.length+' products';
+  $('#resTitle').textContent=S.wishOnly?'Saved items':S.q?`Results for “${S.q}”`:S.cat==='all'?'All products':catOf(S.cat).name;
+  renderBadges();
+}
+function renderBadges(){
+  const n=Object.values(S.cart).reduce((a,b)=>a+b,0);
+  $('#cartN').textContent=n;$('#wishN').textContent=S.wish.length;
+}
+function renderCats(){
+  const opt='<option value="all">All aisles</option>'+CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  $('#searchCat').innerHTML=opt;
+  $('#rail').innerHTML=`<button class="chip" data-cat="all" aria-pressed="true">All aisles</button>`+CATS.map(c=>`<button class="chip" data-cat="${c.id}" aria-pressed="false">${icon(c.id)}${c.name}</button>`).join('');
+  $('#catList').innerHTML=`<label><input type="radio" name="cat" value="all" checked> All aisles <span class="meta mono">${P.length}</span></label>`+CATS.map(c=>`<label><input type="radio" name="cat" value="${c.id}"> ${c.name} <span class="meta mono">${c.items.length}</span></label>`).join('');
+}
+function setCat(id){S.cat=id;S.shown=24;S.wishOnly=false;
+  document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cat===id));
+  document.querySelectorAll('input[name=cat]').forEach(r=>r.checked=r.value===id);
+  $('#searchCat').value=id;renderGrid();}
+function setMode(b){S.biz=b;save();$('#mBiz').setAttribute('aria-pressed',b);$('#mRetail').setAttribute('aria-pressed',!b);
+  $('#goBiz').textContent=b?'Switch to home shopping':'Switch to business buying';renderGrid();if(openCart)drawCart();toast(b?'Business pricing on: bulk tiers and GST invoice':'Home shopping prices');}
+
+/* ---------- deals + timer ---------- */
+function renderDeals(){
+  const top=[...P].sort((a,b)=>b.disc-a.disc).slice(0,3);
+  $('#deals').innerHTML=top.map(p=>`<button class="deal" data-open="${p.id}">${tile(p,'t')}<span><b>${esc(p.name)}</b><small class="mono">${inr(p.price)} <s>${inr(p.mrp)}</s></small></span><span class="off">${p.disc}% off</span></button>`).join('');
+}
+function tick(){const n=new Date(),e=new Date(n);e.setHours(24,0,0,0);const s=Math.floor((e-n)/1000),z=x=>String(x).padStart(2,'0');
+  $('#timer').textContent=`Ends in ${z(Math.floor(s/3600))}:${z(Math.floor(s%3600/60))}:${z(s%60)}`;}
+
+/* ---------- toast ---------- */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2200)}
+
+/* ---------- cart ---------- */
+let openCart=false,coupon='';
+function add(id,q=1){const p=byId(id);const cur=S.cart[id]||0;S.cart[id]=Math.min(cur+q,Math.min(p.stock,50));save();renderBadges();if(openCart)drawCart();toast('Added: '+p.name)}
+function totals(){
+  let sub=0,mrp=0;Object.entries(S.cart).forEach(([id,q])=>{const p=byId(id);sub+=unit(p,q)*q;mrp+=p.mrp*q});
+  let cd=0;if(coupon==='WELCOME10')cd=Math.min(200,sub*.1);if(coupon==='SANTHAI50'&&sub>=999)cd=50;
+  const free=S.biz?2000:499,ship=sub===0||sub-cd>=free?0:49;
+  return{sub,mrp,cd,ship,total:sub-cd+ship,save:mrp-sub+cd};
+}
+function drawCart(){
+  const ids=Object.keys(S.cart),t=totals();
+  const lines=ids.length?ids.map(id=>{const p=byId(id),q=S.cart[id];return `<div class="line">${tile(p,'t')}<div><b>${esc(p.name)}</b><span class="meta">${esc(p.brand)} · <span class="mono">${inr(unit(p,q))}</span> each${S.biz&&tierRate(q)<1?' (bulk)':''}</span><div style="margin-top:6px"><span class="qty"><button data-dec="${id}" aria-label="Decrease">−</button><span>${q}</span><button data-inc="${id}" aria-label="Increase">+</button></span> <button class="link-btn meta" data-rm="${id}">Remove</button></div></div><strong class="mono">${inr(unit(p,q)*q)}</strong></div>`}).join('')
+   :'<div class="empty" style="margin:18px 0">Your cart is empty. Add something from any aisle.</div>';
+  $('#overlay').innerHTML=`<div class="scrim" data-close="1"><section class="panel" role="dialog" aria-modal="true" aria-label="Cart"><header><h2>Cart</h2><button class="x" data-close="1" aria-label="Close cart">✕</button></header>
+  <div class="lines">${lines}</div>
+  <div class="sum">
+   <div class="coupon"><input id="cpn" placeholder="Coupon: WELCOME10" value="${esc(coupon)}" aria-label="Coupon code"><button class="btn ghost" id="applyCpn">Apply</button></div>
+   <div class="r"><span>Subtotal</span><span class="mono">${inr(t.sub)}</span></div>
+   ${t.cd?`<div class="r" style="color:var(--ok)"><span>Coupon</span><span class="mono">−${inr(t.cd)}</span></div>`:''}
+   <div class="r"><span>Delivery</span><span class="mono">${t.ship?inr(t.ship):'Free'}</span></div>
+   ${t.save>0?`<div class="meta" style="color:var(--ok)">You save ${inr(t.save)} on list prices</div>`:''}
+   ${S.biz?'<div class="meta">GST invoice will be issued. Prices include GST.</div>':''}
+   <div class="r tot"><span>Total</span><span class="mono">${inr(t.total)}</span></div>
+   <button class="btn" id="goCheckout" ${ids.length?'':'disabled'}>Checkout</button>
+  </div></section></div>`;
+}
+function showCart(){openCart=true;drawCart();$('#overlay .x')?.focus()}
+function closeAll(){openCart=false;$('#overlay').innerHTML=''}
+
+/* ---------- product modal ---------- */
+function showProduct(id){
+  openCart=false;const p=byId(id),c=catOf(p.cat);
+  const sim=P.filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4);
+  $('#overlay').innerHTML=`<div class="scrim center" data-close="1"><section class="panel modal" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
+  <header><h2>${c.name}</h2><button class="x" data-close="1" aria-label="Close">✕</button></header>
+  <div class="pd">${tile(p,'t')}
+   <div class="stack"><h2>${esc(p.name)}</h2>
+    <div class="stars"><b>${p.rating} ★</b>${p.reviews.toLocaleString('en-IN')} reviews · by ${esc(p.brand)}</div>
+    <div class="price"><strong style="font-size:30px">${inr(p.price)}</strong><s>${inr(p.mrp)}</s><span>${p.disc}% off</span></div>
+    <div class="meta">Delivery: <b class="fast">${eta(p)}</b>${$('#pin').value.length===6?' to '+esc($('#pin').value):''}. ${p.stock<10?`Only ${p.stock} left.`:'In stock.'}</div>
+    ${S.biz?`<table class="tiers"><tr><th>Quantity</th><th>Price each</th><th>Saving</th></tr>${[[1,'1 to 4'],[5,'5 to 19'],[20,'20 and above']].map(([q,l])=>`<tr><td>${l}</td><td class="mono">${inr(unit(p,q))}</td><td>${Math.round((1-tierRate(q))*100)}%</td></tr>`).join('')}</table>`:'<div class="note">Buying for a shop or school? Switch to Business buying (top left) for bulk tiers.</div>'}
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="qty"><button id="pdDec" aria-label="Decrease">−</button><span id="pdQ">1</span><button id="pdInc" aria-label="Increase">+</button></span>
+    <button class="btn" id="pdAdd" data-id="${p.id}">Add to cart</button>
+    <button class="heart" style="height:42px" data-wish="${p.id}" aria-pressed="${S.wish.includes(p.id)}" aria-label="Save">♥</button></div>
+    <div class="meta">7-day returns · Cash on delivery available · Sold by ${esc(p.brand)} via Santhai</div></div>
+   <div class="similar">${sim.map(x=>`<button data-open="${x.id}">${tile(x,'t')}<span>${esc(x.name)}<br><b class="mono">${inr(x.price)}</b></span></button>`).join('')}</div>
+  </div></section></div>`;
+  let q=1;const o=$('#pdQ');
+  $('#pdInc').onclick=()=>{q=Math.min(q+1,Math.min(p.stock,50));o.textContent=q};
+  $('#pdDec').onclick=()=>{q=Math.max(1,q-1);o.textContent=q};
+  $('#pdAdd').onclick=()=>{add(p.id,q);closeAll();showCart()};
+}
+
+/* ---------- checkout (demo, collects no card data) ---------- */
+const CK={step:1,addr:{},pay:'upi'};
+function checkout(){CK.step=1;drawCheckout()}
+function drawCheckout(){
+  const t=totals(),a=CK.addr;
+  const steps=['Address','Payment','Review'].map((s,i)=>`<span class="${CK.step===i+1?'on':''}">${i+1}. ${s}</span>`).join('');
+  let body='';
+  if(CK.step===1)body=`<form class="form" id="addrForm" novalidate>
+   <div class="two"><div class="fld"><label for="fn">Full name</label><input id="fn" value="${esc(a.name||'')}" autocomplete="name"><small id="e-fn"></small></div>
+   <div class="fld"><label for="ph">Mobile number</label><input id="ph" inputmode="numeric" maxlength="10" value="${esc(a.phone||'')}" autocomplete="tel"><small id="e-ph"></small></div></div>
+   <div class="fld"><label for="ad">Street address</label><input id="ad" value="${esc(a.addr||'')}" autocomplete="street-address"><small id="e-ad"></small></div>
+   <div class="two"><div class="fld"><label for="pc">Pincode</label><input id="pc" inputmode="numeric" maxlength="6" value="${esc(a.pin||$('#pin').value||'')}"><small id="e-pc"></small></div>
+   <div class="fld"><label for="gst">GST number ${S.biz?'':'(optional)'}</label><input id="gst" maxlength="15" value="${esc(a.gst||'')}" placeholder="${S.biz?'For GST invoice':''}"></div></div>
+   <button class="btn" type="submit">Continue to payment</button></form>`;
+  if(CK.step===2)body=`<form class="form" id="payForm"><div class="pay">
+   ${[['upi','UPI','Pay with any UPI app'],['card','Debit or credit card','Visa, Mastercard, RuPay'],['net','Net banking','All major banks'],['cod','Cash on delivery','Pay when it arrives']].map(([v,l,d])=>`<label><input type="radio" name="pay" value="${v}" ${CK.pay===v?'checked':''}><span><b>${l}</b><br><small class="meta">${d}</small></span></label>`).join('')}</div>
+   <div class="note">Demo checkout: no payment details are collected and nothing is charged.</div>
+   <div style="display:flex;gap:10px"><button class="btn ghost" type="button" id="back">Back</button><button class="btn" type="submit" style="flex:1">Review order</button></div></form>`;
+  if(CK.step===3){const items=Object.keys(S.cart).map(id=>`<div class="r" style="display:flex;justify-content:space-between;gap:10px"><span>${esc(byId(id).name)} × ${S.cart[id]}</span><span class="mono">${inr(unit(byId(id),S.cart[id])*S.cart[id])}</span></div>`).join('');
+   body=`<div class="form"><div class="sum" style="padding:0;border:0">${items}<hr style="border:0;border-top:1px dashed var(--line);width:100%">
+   <div class="r"><span>Delivery</span><span class="mono">${t.ship?inr(t.ship):'Free'}</span></div>${t.cd?`<div class="r"><span>Coupon</span><span class="mono">−${inr(t.cd)}</span></div>`:''}
+   <div class="r tot"><span>Total</span><span class="mono">${inr(t.total)}</span></div></div>
+   <div class="note"><b>Ship to:</b> ${esc(a.name)}, ${esc(a.addr)}, ${esc(a.pin)} · ${esc(a.phone)}<br><b>Pay by:</b> ${{upi:'UPI',card:'Card',net:'Net banking',cod:'Cash on delivery'}[CK.pay]}</div>
+   <div style="display:flex;gap:10px"><button class="btn ghost" id="back">Back</button><button class="btn" id="place" style="flex:1">Place demo order · ${inr(t.total)}</button></div></div>`}
+  $('#overlay').innerHTML=`<div class="scrim center" data-close="1"><section class="panel modal" style="width:min(560px,100%)" role="dialog" aria-modal="true" aria-label="Checkout"><header><h2>Checkout</h2><button class="x" data-close="1" aria-label="Close">✕</button></header><div class="steps">${steps}</div>${body}</section></div>`;
+  const f1=$('#addrForm');if(f1)f1.onsubmit=e=>{e.preventDefault();
+    const v=id=>$('#'+id).value.trim(),err={};
+    if(v('fn').length<2)err.fn='Enter your full name';
+    if(!/^[6-9]\d{9}$/.test(v('ph')))err.ph='Enter a 10-digit mobile number';
+    if(v('ad').length<8)err.ad='Enter your street address';
+    if(!/^\d{6}$/.test(v('pc')))err.pc='Enter a 6-digit pincode';
+    ['fn','ph','ad','pc'].forEach(k=>$('#e-'+k).textContent=err[k]||'');
+    CK.addr={name:v('fn'),phone:v('ph'),addr:v('ad'),pin:v('pc'),gst:v('gst')};
+    if(!Object.keys(err).length){CK.step=2;drawCheckout()}};
+  const f2=$('#payForm');if(f2)f2.onsubmit=e=>{e.preventDefault();CK.pay=f2.pay.value;CK.step=3;drawCheckout()};
+  const bk=$('#back');if(bk)bk.onclick=()=>{CK.step--;drawCheckout()};
+  const pl=$('#place');if(pl)pl.onclick=()=>{
+    const id='SN-'+Math.random().toString(36).slice(2,8).toUpperCase(),total=totals().total;
+    S.cart={};save();coupon='';renderBadges();
+    $('#overlay').innerHTML=`<div class="scrim center" data-close="1"><section class="panel modal" style="width:min(520px,100%)" role="dialog" aria-modal="true" aria-label="Order confirmed"><div class="done"><div class="ok">✓</div><h2>Demo order placed</h2><p class="mono">${id} · ${inr(total)}</p><p class="meta" style="max-width:40ch">This is a demo storefront, so nothing was charged and nothing will ship. In a live store this screen would show tracking and the invoice${S.biz?' with your GST details':''}.</p><button class="btn" data-close="1">Keep shopping</button></div></section></div>`;
+  };
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-open],[data-add],[data-wish],[data-cat],[data-close],[data-inc],[data-dec],[data-rm]');
+  if(!t){return}
+  const d=t.dataset;
+  if(d.open!==undefined)return showProduct(+d.open);
+  if(d.add!==undefined)return add(+d.add);
+  if(d.wish!==undefined){const id=+d.wish,i=S.wish.indexOf(id);i<0?S.wish.push(id):S.wish.splice(i,1);save();
+    document.querySelectorAll(`[data-wish="${id}"]`).forEach(b=>b.setAttribute('aria-pressed',i<0));renderBadges();if(S.wishOnly)renderGrid();return}
+  if(d.cat!==undefined){setCat(d.cat);S.q='';$('#q').value='';renderGrid();return}
+  if(d.close!==undefined){if(t.classList.contains('scrim')&&e.target!==t)return;return closeAll()}
+  if(d.inc!==undefined){S.cart[d.inc]=Math.min(S.cart[d.inc]+1,Math.min(byId(d.inc).stock,50));save();renderBadges();return drawCart()}
+  if(d.dec!==undefined){S.cart[d.dec]--;if(S.cart[d.dec]<=0)delete S.cart[d.dec];save();renderBadges();return drawCart()}
+  if(d.rm!==undefined){delete S.cart[d.rm];save();renderBadges();return drawCart()}
+});
+document.addEventListener('click',e=>{
+  if(e.target.id==='applyCpn'){const v=$('#cpn').value.trim().toUpperCase();
+    if(!v){coupon='';drawCart();return}
+    if(v==='WELCOME10'||v==='SANTHAI50'){coupon=v;drawCart();toast(v==='SANTHAI50'&&totals().cd===0?'SANTHAI50 needs ₹999 in the cart':'Coupon applied')}
+    else toast('Coupon not recognised. Try WELCOME10');}
+  if(e.target.id==='goCheckout')checkout();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+$('#cartBtn').onclick=showCart;
+$('#wishBtn').onclick=()=>{if(!S.wish.length&&!S.wishOnly){toast('Tap ♥ on a product to save it');return}S.wishOnly=!S.wishOnly;S.q='';S.cat='all';document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cat==='all'));renderGrid();$('#catalog').scrollIntoView({behavior:'smooth'})};
+$('#mRetail').onclick=()=>setMode(false);$('#mBiz').onclick=()=>setMode(true);
+$('#goBiz').onclick=()=>setMode(!S.biz);
+$('#shopNow').onclick=()=>{setCat('all');$('#catalog').scrollIntoView({behavior:'smooth'})};
+$('#searchForm').onsubmit=e=>{e.preventDefault();S.q=$('#q').value;S.shown=24;S.wishOnly=false;setCat($('#searchCat').value);$('#catalog').scrollIntoView({behavior:'smooth'})};
+$('#price').oninput=e=>{S.max=+e.target.value;$('#priceOut').textContent='up to '+inr(S.max);S.shown=24;renderGrid()};
+document.querySelectorAll('input[name=rate]').forEach(r=>r.onchange=()=>{S.minRate=+r.value;renderGrid()});
+$('#fast').onchange=e=>{S.fast=e.target.checked;renderGrid()};
+$('#deals25').onchange=e=>{S.d25=e.target.checked;renderGrid()};
+$('#catList').onchange=e=>{if(e.target.name==='cat')setCat(e.target.value)};
+$('#sort').onchange=e=>{S.sort=e.target.value;renderGrid()};
+$('#more').onclick=()=>{S.shown+=24;renderGrid()};
+$('#reset').onclick=()=>{Object.assign(S,{max:14000,minRate:0,fast:false,d25:false,q:'',sort:'rel',wishOnly:false});$('#price').value=14000;$('#priceOut').textContent='up to '+inr(14000);
+  document.querySelector('input[name=rate][value="0"]').checked=true;$('#fast').checked=false;$('#deals25').checked=false;$('#q').value='';$('#sort').value='rel';setCat('all')};
+$('#fbtn').onclick=()=>$('#filters').classList.toggle('open');
+$('#theme').onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark'};
+
+/* ---------- boot ---------- */
+renderCats();renderDeals();tick();setInterval(tick,1000);
+$('#priceOut').textContent='up to '+inr(S.max);
+$('#mBiz').setAttribute('aria-pressed',S.biz);$('#mRetail').setAttribute('aria-pressed',!S.biz);
+$('#goBiz').textContent=S.biz?'Switch to home shopping':'Switch to business buying';
+renderGrid();
+</script>
+
+</body></html>
